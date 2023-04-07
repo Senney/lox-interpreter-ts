@@ -45,7 +45,6 @@ class Scanner {
     };
 
     const match = (char: string): boolean => {
-      console.log(this.source.charAt(this.current), char);
       if (this.isAtEnd()) return false;
       if (this.source.charAt(this.current) !== char) return false;
 

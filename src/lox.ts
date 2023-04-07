@@ -11,7 +11,7 @@ class LoxCompiler {
       console.error('Usage: lox [script]');
       process.exit(64);
     } else if (process.argv.length === 3) {
-      this.runFile(process.argv[1]);
+      this.runFile(process.argv[2]);
     } else {
       this.runPrompt();
     }
