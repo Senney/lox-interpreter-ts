@@ -1,6 +1,9 @@
 import fs from 'fs';
 
 import { LoxRepl } from './repl/lox-repl';
+import { Scanner } from './lex/scanner';
+
+let hadError = false;
 
 class LoxCompiler {
   public static async main(): Promise<void> {
@@ -17,13 +20,39 @@ class LoxCompiler {
   private static runFile(path: string): void {
     console.log(`Executing file ${path}`);
     const fileContent = fs.readFileSync(path, 'utf-8');
-    // TODO: Run file content through lexer.
+
+    this.run(fileContent);
+
+    if (hadError) {
+      process.exit(65);
+    }
   }
 
   private static runPrompt(): void {
     console.log('Starting Lox prompt...');
     new LoxRepl().start();
   }
+
+  private static run(source: string): void {
+    const scanner = new Scanner(source);
+    const tokens = scanner.scanTokens();
+
+    for (const token of tokens) {
+      console.log(token);
+    }
+  }
+
+  public static error(line: number, err: string): void {
+    this.report(line, '', err);
+  }
+
+  private static report(line: number, where: string, message: string): void {
+    console.error(`[line ${line}] Error ${where}: ${message}`);
+
+    hadError = true;
+  }
 }
 
 LoxCompiler.main();
+
+export { LoxCompiler };
