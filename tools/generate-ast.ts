@@ -20,6 +20,10 @@ function kebabCase(str: string): string {
   return newString;
 }
 
+function snakeCase(str: string): string {
+  return str.slice(0, 1).toLowerCase() + str.slice(1);
+}
+
 function defineAst(outputDir: string, baseName: string, types: string[]): void {
   const typeRootPath = path.join(outputDir, `${kebabCase(baseName)}.ts`);
   const typeRootFile = ts.createSourceFile(
@@ -54,6 +58,34 @@ function defineAst(outputDir: string, baseName: string, types: string[]): void {
     );
   });
 
+  const visitorMethods = types.map((type) => {
+    const typeName = `${type.split(':')[0].trim()}${baseName}`;
+    return ts.factory.createMethodSignature(
+      [],
+      `visit${typeName}`,
+      undefined,
+      undefined,
+      [
+        ts.factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          snakeCase(typeName),
+          undefined,
+          ts.factory.createTypeReferenceNode(typeName)
+        ),
+      ],
+      ts.factory.createTypeReferenceNode('R')
+    );
+  });
+
+  const visitorInterface = ts.factory.createInterfaceDeclaration(
+    [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+    'Visitor',
+    [ts.factory.createTypeParameterDeclaration(undefined, 'R')],
+    undefined,
+    visitorMethods
+  );
+
   const abstractBaseClass = ts.factory.createClassDeclaration(
     [
       ts.factory.createToken(ts.SyntaxKind.ExportKeyword),
@@ -62,7 +94,28 @@ function defineAst(outputDir: string, baseName: string, types: string[]): void {
     baseName,
     undefined,
     undefined,
-    []
+    [
+      ts.factory.createMethodDeclaration(
+        [ts.factory.createToken(ts.SyntaxKind.AbstractKeyword)],
+        undefined,
+        'accept',
+        undefined,
+        [ts.factory.createTypeParameterDeclaration(undefined, 'R')],
+        [
+          ts.factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'visitor',
+            undefined,
+            ts.factory.createTypeReferenceNode('Visitor', [
+              ts.factory.createTypeReferenceNode('R'),
+            ])
+          ),
+        ],
+        ts.factory.createTypeReferenceNode('R'),
+        undefined
+      ),
+    ]
   );
 
   const children: ts.Node[] = [];
@@ -97,9 +150,10 @@ function defineAst(outputDir: string, baseName: string, types: string[]): void {
       ]
     );
 
+    const childClassName = `${className}${baseName}`;
     const childClass = ts.factory.createClassDeclaration(
       [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      `${className}${baseName}`,
+      childClassName,
       undefined,
       [heritage],
       [
@@ -116,13 +170,49 @@ function defineAst(outputDir: string, baseName: string, types: string[]): void {
             ),
           ])
         ),
+        ts.factory.createMethodDeclaration(
+          undefined,
+          undefined,
+          'accept',
+          undefined,
+          [ts.factory.createTypeParameterDeclaration(undefined, 'R')],
+          [
+            ts.factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              'visitor',
+              undefined,
+              ts.factory.createTypeReferenceNode('Visitor', [
+                ts.factory.createTypeReferenceNode('R'),
+              ])
+            ),
+          ],
+          ts.factory.createTypeReferenceNode('R'),
+          ts.factory.createBlock([
+            ts.factory.createReturnStatement(
+              ts.factory.createCallExpression(
+                ts.factory.createPropertyAccessExpression(
+                  ts.factory.createIdentifier('visitor'),
+                  `visit${childClassName}`
+                ),
+                undefined,
+                [ts.factory.createThis()]
+              )
+            ),
+          ])
+        ),
       ]
     );
 
     children.push(childClass);
   }
 
-  const sourceFile = [...importStatements, abstractBaseClass, ...children]
+  const sourceFile = [
+    ...importStatements,
+    visitorInterface,
+    abstractBaseClass,
+    ...children,
+  ]
     .map((node) =>
       printer.printNode(ts.EmitHint.Unspecified, node, typeRootFile)
     )
