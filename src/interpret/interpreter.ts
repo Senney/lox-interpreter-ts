@@ -5,18 +5,23 @@ import {
   LiteralExpression,
   UnaryExpression,
   ExpressionVisitor,
+  VariableExpression,
 } from '../ast/expression';
 import {
   ExpressionStatement,
   PrintStatement,
   Statement,
   StatementVisitor,
+  VarStatement,
 } from '../ast/statement';
 import { TokenType } from '../lex/token-type';
+import { Environment } from './environment';
 
 class Interpreter
   implements ExpressionVisitor<unknown>, StatementVisitor<unknown>
 {
+  private environment: Environment = new Environment();
+
   interpret(statements: Statement[]): void {
     try {
       for (const statement of statements) {
@@ -25,6 +30,16 @@ class Interpreter
     } catch (error) {
       console.error(error);
     }
+  }
+
+  visitVarStatement(varStatement: VarStatement): unknown {
+    const value = varStatement.initializer
+      ? this.evaluate(varStatement.initializer)
+      : null;
+
+    this.environment.define(varStatement.name.lexeme, value);
+
+    return null;
   }
 
   visitExpressionStatement(expressionStatement: ExpressionStatement): unknown {
@@ -89,6 +104,10 @@ class Interpreter
     }
 
     return null;
+  }
+
+  visitVariableExpression(variableExpression: VariableExpression): unknown {
+    return this.environment.get(variableExpression.name);
   }
 
   private evaluate(expr: Expression): unknown {
