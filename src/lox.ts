@@ -2,6 +2,7 @@ import fs from 'fs';
 
 import { LoxRepl } from './repl/lox-repl';
 import { Scanner } from './lex/scanner';
+import { Parser } from './parse/parser';
 
 let hadError = false;
 
@@ -37,9 +38,8 @@ class LoxCompiler {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
 
-    for (const token of tokens) {
-      console.log(token);
-    }
+    const parser = new Parser(tokens);
+    parser.parse();
   }
 
   public static error(line: number, err: string): void {
