@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node ./src/lox.ts",
-    "generate-ast": "ts-node ./tools/generate-ast.ts"
+    "generate-ast": "ts-node ./tools/generate-ast.ts",
+    "format": "prettier -w ./src"
   },
   "keywords": [],
   "author": "",
