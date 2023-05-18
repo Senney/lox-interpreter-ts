@@ -7,25 +7,47 @@ import {
   GroupingExpression,
 } from '../ast/expression';
 import { TokenType } from '../lex/token-type';
+import {
+  ExpressionStatement,
+  PrintStatement,
+  Statement,
+} from '../ast/statement';
 
 class Parser {
   private current = 0;
 
   constructor(private tokens: Token[]) {}
 
-  public parse(): Expression[] {
-    const expressions: Expression[] = [];
+  public parse(): Statement[] {
+    const statements: Statement[] = [];
 
     while (!this.isAtEnd()) {
-      const expr = this.expression();
-      expressions.push(expr);
+      statements.push(this.statement());
     }
 
-    return expressions;
+    return statements;
   }
 
   private expression(): Expression {
     return this.equality();
+  }
+
+  private statement(): Statement {
+    if (this.match(TokenType.PRINT)) return this.printStatement();
+
+    return this.expressionStatement();
+  }
+
+  private printStatement(): Statement {
+    const value = this.expression();
+    this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
+    return new PrintStatement(value);
+  }
+
+  private expressionStatement(): Statement {
+    const expression = this.expression();
+    this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
+    return new ExpressionStatement(expression);
   }
 
   private equality(): Expression {
@@ -123,6 +145,14 @@ class Parser {
     }
 
     return false;
+  }
+
+  private consume(tokenType: TokenType, expected: string): void {
+    if (!this.check(tokenType)) {
+      throw new Error(expected);
+    }
+
+    this.advance();
   }
 
   private check(tokenType: TokenType): boolean {
