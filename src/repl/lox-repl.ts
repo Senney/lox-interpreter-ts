@@ -22,9 +22,9 @@ class LoxRepl {
     const tokens = scanner.scanTokens();
 
     const parser = new Parser(tokens);
-    const expressions = parser.parse();
+    const statements = parser.parse();
 
-    new Interpreter().interpret(expressions[0]);
+    new Interpreter().interpret(statements);
 
     cb(null, null);
   }

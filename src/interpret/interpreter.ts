@@ -4,18 +4,38 @@ import {
   GroupingExpression,
   LiteralExpression,
   UnaryExpression,
-  Visitor,
+  ExpressionVisitor,
 } from '../ast/expression';
+import {
+  ExpressionStatement,
+  PrintStatement,
+  Statement,
+  StatementVisitor,
+} from '../ast/statement';
 import { TokenType } from '../lex/token-type';
 
-class Interpreter implements Visitor<unknown> {
-  interpret(expression: Expression): void {
+class Interpreter
+  implements ExpressionVisitor<unknown>, StatementVisitor<unknown>
+{
+  interpret(statements: Statement[]): void {
     try {
-      const result = this.evaluate(expression);
-      console.log(this.stringify(result));
+      for (const statement of statements) {
+        statement.accept(this);
+      }
     } catch (error) {
       console.error(error);
     }
+  }
+
+  visitExpressionStatement(expressionStatement: ExpressionStatement): unknown {
+    this.evaluate(expressionStatement.expression);
+    return null;
+  }
+
+  visitPrintStatement(printStatement: PrintStatement): unknown {
+    const value = this.evaluate(printStatement.expression);
+    console.log(this.stringify(value));
+    return null;
   }
 
   visitBinaryExpression(binaryExpression: BinaryExpression): unknown {

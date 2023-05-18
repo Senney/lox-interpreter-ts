@@ -87,9 +87,11 @@ function defineAst(
     );
   });
 
+  const visitorInterfaceName = `${baseName}Visitor`;
+
   const visitorInterface = ts.factory.createInterfaceDeclaration(
     [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-    'Visitor',
+    visitorInterfaceName,
     [ts.factory.createTypeParameterDeclaration(undefined, 'R')],
     undefined,
     visitorMethods
@@ -116,7 +118,7 @@ function defineAst(
             undefined,
             'visitor',
             undefined,
-            ts.factory.createTypeReferenceNode('Visitor', [
+            ts.factory.createTypeReferenceNode(visitorInterfaceName, [
               ts.factory.createTypeReferenceNode('R'),
             ])
           ),
@@ -191,7 +193,7 @@ function defineAst(
               undefined,
               'visitor',
               undefined,
-              ts.factory.createTypeReferenceNode('Visitor', [
+              ts.factory.createTypeReferenceNode(visitorInterfaceName, [
                 ts.factory.createTypeReferenceNode('R'),
               ])
             ),
@@ -245,6 +247,6 @@ defineAst(
 defineAst(
   'src/ast',
   'Statement',
-  ['Expression : Expression Expression', 'Print : Expression expression'],
+  ['Expression : Expression expression', 'Print : Expression expression'],
   [['Expression', 'src/ast/expression']]
 );
