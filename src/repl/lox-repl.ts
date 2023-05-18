@@ -5,6 +5,8 @@ import { Scanner } from '../lex/scanner';
 import { Parser } from '../parse/parser';
 
 class LoxRepl {
+  private interpreter: Interpreter = new Interpreter();
+
   start(): void {
     repl.start({
       prompt: 'lox > ',
@@ -24,7 +26,7 @@ class LoxRepl {
     const parser = new Parser(tokens);
     const statements = parser.parse();
 
-    new Interpreter().interpret(statements);
+    this.interpreter.interpret(statements);
 
     cb(null, null);
   }

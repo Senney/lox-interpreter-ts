@@ -20,7 +20,11 @@ import { Environment } from './environment';
 class Interpreter
   implements ExpressionVisitor<unknown>, StatementVisitor<unknown>
 {
-  private environment: Environment = new Environment();
+  private environment: Environment;
+
+  constructor(environment?: Environment) {
+    this.environment = environment ?? new Environment();
+  }
 
   interpret(statements: Statement[]): void {
     try {
