@@ -3,6 +3,7 @@ import fs from 'fs';
 import { LoxRepl } from './repl/lox-repl';
 import { Scanner } from './lex/scanner';
 import { Parser } from './parse/parser';
+import { Interpreter } from './interpret/interpreter';
 
 let hadError = false;
 
@@ -39,7 +40,9 @@ class LoxCompiler {
     const tokens = scanner.scanTokens();
 
     const parser = new Parser(tokens);
-    parser.parse();
+    const statements = parser.parse();
+
+    new Interpreter().interpret(statements);
   }
 
   public static error(line: number, err: string): void {
