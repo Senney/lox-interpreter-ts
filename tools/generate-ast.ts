@@ -2,7 +2,7 @@ import ts from 'typescript';
 import path from 'path';
 import fs from 'fs';
 
-const globalImports = [['Token', 'src/lex/token']];
+const globalImports: [string, string][] = [];
 
 function kebabCase(str: string): string {
   let newString = '';
@@ -24,7 +24,12 @@ function snakeCase(str: string): string {
   return str.slice(0, 1).toLowerCase() + str.slice(1);
 }
 
-function defineAst(outputDir: string, baseName: string, types: string[]): void {
+function defineAst(
+  outputDir: string,
+  baseName: string,
+  types: string[],
+  imports: [string, string][] = []
+): void {
   const typeRootPath = path.join(outputDir, `${kebabCase(baseName)}.ts`);
   const typeRootFile = ts.createSourceFile(
     typeRootPath,
@@ -35,11 +40,15 @@ function defineAst(outputDir: string, baseName: string, types: string[]): void {
   );
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-  const importStatements = globalImports.map((imp) => {
-    const relativePath = path
+  const importStatements = [...globalImports, ...imports].map((imp) => {
+    let relativePath = path
       .relative(outputDir, imp[1])
       .split(path.sep)
       .join(path.posix.sep);
+
+    if (!relativePath.startsWith('../')) {
+      relativePath = `./${relativePath}`;
+    }
 
     return ts.factory.createImportDeclaration(
       undefined,
@@ -221,9 +230,21 @@ function defineAst(outputDir: string, baseName: string, types: string[]): void {
   fs.writeFileSync(typeRootPath, sourceFile, 'utf-8');
 }
 
-defineAst('src/ast', 'Expression', [
-  'Binary : Expression lhs, Token operator, Expression rhs',
-  'Grouping : Expression expr',
-  'Literal : unknown value',
-  'Unary : Expression rhs, Token operator',
-]);
+defineAst(
+  'src/ast',
+  'Expression',
+  [
+    'Binary : Expression lhs, Token operator, Expression rhs',
+    'Grouping : Expression expr',
+    'Literal : unknown value',
+    'Unary : Expression rhs, Token operator',
+  ],
+  [['Token', 'src/lex/token']]
+);
+
+defineAst(
+  'src/ast',
+  'Statement',
+  ['Expression : Expression Expression', 'Print : Expression expression'],
+  [['Expression', 'src/ast/expression']]
+);

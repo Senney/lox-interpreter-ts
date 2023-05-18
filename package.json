@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "ts-node ./src/lox.ts"
+    "start": "ts-node ./src/lox.ts",
+    "generate-ast": "ts-node ./tools/generate-ast.ts"
   },
   "keywords": [],
   "author": "",
