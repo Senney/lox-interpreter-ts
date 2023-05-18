@@ -4,6 +4,7 @@ export interface ExpressionVisitor<R> {
   visitGroupingExpression(groupingExpression: GroupingExpression): R;
   visitLiteralExpression(literalExpression: LiteralExpression): R;
   visitUnaryExpression(unaryExpression: UnaryExpression): R;
+  visitVariableExpression(variableExpression: VariableExpression): R;
 }
 export abstract class Expression {
   abstract accept<R>(visitor: ExpressionVisitor<R>): R;
@@ -42,5 +43,13 @@ export class UnaryExpression extends Expression {
   }
   accept<R>(visitor: ExpressionVisitor<R>): R {
     return visitor.visitUnaryExpression(this);
+  }
+}
+export class VariableExpression extends Expression {
+  constructor(public name: Token) {
+    super();
+  }
+  accept<R>(visitor: ExpressionVisitor<R>): R {
+    return visitor.visitVariableExpression(this);
   }
 }

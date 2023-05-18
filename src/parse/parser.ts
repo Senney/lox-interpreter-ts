@@ -5,12 +5,14 @@ import {
   UnaryExpression,
   LiteralExpression,
   GroupingExpression,
+  VariableExpression,
 } from '../ast/expression';
 import { TokenType } from '../lex/token-type';
 import {
   ExpressionStatement,
   PrintStatement,
   Statement,
+  VarStatement,
 } from '../ast/statement';
 
 class Parser {
@@ -30,6 +32,28 @@ class Parser {
 
   private expression(): Expression {
     return this.equality();
+  }
+
+  private delcaration(): Statement {
+    if (this.match(TokenType.VAR)) {
+      return this.varDeclaration();
+    }
+
+    return this.statement();
+  }
+
+  private varDeclaration(): Statement {
+    const name = this.consume(TokenType.IDENTIFIER, 'Expected variable name.');
+    const initializer = this.match(TokenType.EQUAL)
+      ? this.expression()
+      : undefined;
+
+    this.consume(
+      TokenType.SEMICOLON,
+      "Expected ';' after variable declaration."
+    );
+
+    return new VarStatement(name, initializer);
   }
 
   private statement(): Statement {
@@ -133,6 +157,10 @@ class Parser {
     if (this.match(TokenType.NUMBER, TokenType.STRING))
       return new LiteralExpression(this.previous().literal);
 
+    if (this.match(TokenType.IDENTIFIER)) {
+      return new VariableExpression(this.previous());
+    }
+
     throw new Error('Fell through the parser');
   }
 
@@ -147,12 +175,12 @@ class Parser {
     return false;
   }
 
-  private consume(tokenType: TokenType, expected: string): void {
+  private consume(tokenType: TokenType, expected: string): Token {
     if (!this.check(tokenType)) {
       throw new Error(expected);
     }
 
-    this.advance();
+    return this.advance();
   }
 
   private check(tokenType: TokenType): boolean {

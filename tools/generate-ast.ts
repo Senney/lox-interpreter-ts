@@ -240,6 +240,7 @@ defineAst(
     'Grouping : Expression expr',
     'Literal : unknown value',
     'Unary : Expression rhs, Token operator',
+    'Variable : Token name',
   ],
   [['Token', 'src/lex/token']]
 );
@@ -247,6 +248,13 @@ defineAst(
 defineAst(
   'src/ast',
   'Statement',
-  ['Expression : Expression expression', 'Print : Expression expression'],
-  [['Expression', 'src/ast/expression']]
+  [
+    'Expression : Expression expression',
+    'Print : Expression expression',
+    'Var : Token name, Expression initializer?',
+  ],
+  [
+    ['Token', 'src/lex/token'],
+    ['Expression', 'src/ast/expression'],
+  ]
 );
