@@ -37,7 +37,7 @@ export class LiteralExpression extends Expression {
   }
 }
 export class UnaryExpression extends Expression {
-  constructor(public lhs: Expression, public operator: Token) {
+  constructor(public rhs: Expression, public operator: Token) {
     super();
   }
   accept<R>(visitor: Visitor<R>): R {

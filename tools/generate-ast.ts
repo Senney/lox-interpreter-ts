@@ -225,5 +225,5 @@ defineAst('src/ast', 'Expression', [
   'Binary : Expression lhs, Token operator, Expression rhs',
   'Grouping : Expression expr',
   'Literal : unknown value',
-  'Unary : Expression lhs, Token operator',
+  'Unary : Expression rhs, Token operator',
 ]);

@@ -1,5 +1,6 @@
 import repl from 'repl';
 import { Context } from 'vm';
+import { Interpreter } from '../interpret/interpreter';
 import { Scanner } from '../lex/scanner';
 import { Parser } from '../parse/parser';
 
@@ -21,8 +22,10 @@ class LoxRepl {
     const tokens = scanner.scanTokens();
 
     const parser = new Parser(tokens);
-    parser.parse();
-    
+    const expressions = parser.parse();
+
+    new Interpreter().interpret(expressions[0]);
+
     cb(null, null);
   }
 }

@@ -13,11 +13,15 @@ class Parser {
 
   constructor(private tokens: Token[]) {}
 
-  public parse() {
+  public parse(): Expression[] {
+    const expressions: Expression[] = [];
+
     while (!this.isAtEnd()) {
       const expr = this.expression();
-      console.log(expr);
+      expressions.push(expr);
     }
+
+    return expressions;
   }
 
   private expression(): Expression {
@@ -104,7 +108,8 @@ class Parser {
     if (this.match(TokenType.FALSE)) return new LiteralExpression(false);
     if (this.match(TokenType.NIL)) return new LiteralExpression(null);
 
-    if (this.match(TokenType.NUMBER, TokenType.STRING)) return new LiteralExpression(this.previous().literal);
+    if (this.match(TokenType.NUMBER, TokenType.STRING))
+      return new LiteralExpression(this.previous().literal);
 
     throw new Error('Fell through the parser');
   }
