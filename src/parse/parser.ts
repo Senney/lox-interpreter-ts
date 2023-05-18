@@ -24,7 +24,7 @@ class Parser {
     const statements: Statement[] = [];
 
     while (!this.isAtEnd()) {
-      statements.push(this.statement());
+      statements.push(this.delcaration());
     }
 
     return statements;
