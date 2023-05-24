@@ -2,8 +2,11 @@ import { Token } from '../lex/token';
 
 class Environment {
   private values: Map<string, unknown>;
-  constructor() {
+  private enclosing?: Environment;
+
+  constructor(enclosing?: Environment) {
     this.values = new Map();
+    this.enclosing = enclosing;
   }
 
   public define(name: string, value: unknown): void {
@@ -16,12 +19,20 @@ class Environment {
       return;
     }
 
+    if (this.enclosing) {
+      this.enclosing.assign(name, value);
+    }
+
     throw new Error(`UNdefined variable "${name.lexeme}".`);
   }
 
   public get(name: Token): unknown {
     if (this.values.has(name.lexeme)) {
       return this.values.get(name.lexeme);
+    }
+
+    if (this.enclosing) {
+      return this.enclosing.get(name);
     }
 
     throw new Error(`Undefined variable "${name.lexeme}.`);
