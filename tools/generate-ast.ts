@@ -236,6 +236,7 @@ defineAst(
   'src/ast',
   'Expression',
   [
+    'Assign : Token name, Expression value',
     'Binary : Expression lhs, Token operator, Expression rhs',
     'Grouping : Expression expr',
     'Literal : unknown value',

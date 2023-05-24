@@ -1,5 +1,6 @@
 import { Token } from '../lex/token';
 export interface ExpressionVisitor<R> {
+  visitAssignExpression(assignExpression: AssignExpression): R;
   visitBinaryExpression(binaryExpression: BinaryExpression): R;
   visitGroupingExpression(groupingExpression: GroupingExpression): R;
   visitLiteralExpression(literalExpression: LiteralExpression): R;
@@ -8,6 +9,14 @@ export interface ExpressionVisitor<R> {
 }
 export abstract class Expression {
   abstract accept<R>(visitor: ExpressionVisitor<R>): R;
+}
+export class AssignExpression extends Expression {
+  constructor(public name: Token, public value: Expression) {
+    super();
+  }
+  accept<R>(visitor: ExpressionVisitor<R>): R {
+    return visitor.visitAssignExpression(this);
+  }
 }
 export class BinaryExpression extends Expression {
   constructor(
