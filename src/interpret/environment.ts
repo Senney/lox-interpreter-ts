@@ -10,6 +10,15 @@ class Environment {
     this.values.set(name, value);
   }
 
+  assign(name: Token, value: unknown): void {
+    if (this.values.has(name.lexeme)) {
+      this.values.set(name.lexeme, value);
+      return;
+    }
+
+    throw new Error(`UNdefined variable "${name.lexeme}".`);
+  }
+
   public get(name: Token): unknown {
     if (this.values.has(name.lexeme)) {
       return this.values.get(name.lexeme);

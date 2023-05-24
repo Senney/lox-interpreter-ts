@@ -6,6 +6,7 @@ import {
   LiteralExpression,
   GroupingExpression,
   VariableExpression,
+  AssignExpression,
 } from '../ast/expression';
 import { TokenType } from '../lex/token-type';
 import {
@@ -31,7 +32,24 @@ class Parser {
   }
 
   private expression(): Expression {
-    return this.equality();
+    return this.assignment();
+  }
+
+  private assignment(): Expression {
+    const expr = this.equality();
+
+    if (this.match(TokenType.EQUAL)) {
+      const value = this.assignment();
+
+      if (expr instanceof VariableExpression) {
+        const name = expr.name;
+        return new AssignExpression(name, value);
+      }
+
+      throw new Error('Invalid assignment target.');
+    }
+
+    return expr;
   }
 
   private delcaration(): Statement {

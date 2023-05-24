@@ -6,6 +6,7 @@ import {
   UnaryExpression,
   ExpressionVisitor,
   VariableExpression,
+  AssignExpression,
 } from '../ast/expression';
 import {
   ExpressionStatement,
@@ -44,6 +45,12 @@ class Interpreter
     this.environment.define(varStatement.name.lexeme, value);
 
     return null;
+  }
+
+  visitAssignExpression(assignExpression: AssignExpression): unknown {
+    const value = this.evaluate(assignExpression.value);
+    this.environment.assign(assignExpression.name, value);
+    return value;
   }
 
   visitExpressionStatement(expressionStatement: ExpressionStatement): unknown {
