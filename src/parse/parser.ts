@@ -7,6 +7,7 @@ import {
   GroupingExpression,
   VariableExpression,
   AssignExpression,
+  LogicalExpression,
 } from '../ast/expression';
 import { TokenType } from '../lex/token-type';
 import {
@@ -38,7 +39,7 @@ class Parser {
   }
 
   private assignment(): Expression {
-    const expr = this.equality();
+    const expr = this.or();
 
     if (this.match(TokenType.EQUAL)) {
       const value = this.assignment();
@@ -120,6 +121,30 @@ class Parser {
     const expression = this.expression();
     this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
     return new ExpressionStatement(expression);
+  }
+
+  private or(): Expression {
+    let expr = this.and();
+
+    while (this.match(TokenType.OR)) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new LogicalExpression(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private and(): Expression {
+    let expr = this.equality();
+
+    while (this.match(TokenType.AND)) {
+      const operator = this.previous();
+      const right = this.equality();
+      expr = new LogicalExpression(expr, operator, right);
+    }
+
+    return expr;
   }
 
   private equality(): Expression {

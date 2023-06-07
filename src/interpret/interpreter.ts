@@ -7,6 +7,7 @@ import {
   ExpressionVisitor,
   VariableExpression,
   AssignExpression,
+  LogicalExpression,
 } from '../ast/expression';
 import {
   BlockStatement,
@@ -121,6 +122,18 @@ class Interpreter
 
   visitLiteralExpression(literalExpression: LiteralExpression): unknown {
     return literalExpression.value;
+  }
+
+  visitLogicalExpression(logicalExpression: LogicalExpression): unknown {
+    const left = this.evaluate(logicalExpression.left);
+
+    if (logicalExpression.operator.type === TokenType.OR) {
+      if (this.isTruthy(left)) return left;
+    } else {
+      if (!this.isTruthy(left)) return left;
+    }
+
+    return this.evaluate(logicalExpression.right);
   }
 
   visitUnaryExpression(unaryExpression: UnaryExpression): unknown {
