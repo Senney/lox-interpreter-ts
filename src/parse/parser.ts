@@ -12,6 +12,7 @@ import { TokenType } from '../lex/token-type';
 import {
   BlockStatement,
   ExpressionStatement,
+  IfStatement,
   PrintStatement,
   Statement,
   VarStatement,
@@ -76,10 +77,22 @@ class Parser {
   }
 
   private statement(): Statement {
+    if (this.match(TokenType.IF)) return this.ifStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
     if (this.match(TokenType.LEFT_BRACE)) return new BlockStatement(this.block());
 
     return this.expressionStatement();
+  }
+
+  private ifStatement(): Statement {
+    this.consume(TokenType.LEFT_PAREN, "Expected '(' after 'if'.");
+    const condition = this.expression();
+    this.consume(TokenType.RIGHT_PAREN, "Expected ')' after 'if' condition.");
+
+    const thenBranch = this.statement();
+    const elseBranch = this.match(TokenType.ELSE) ? this.statement() : undefined;
+
+    return new IfStatement(condition, thenBranch, elseBranch);
   }
 
   private printStatement(): Statement {

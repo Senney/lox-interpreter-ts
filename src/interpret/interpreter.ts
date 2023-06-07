@@ -11,6 +11,7 @@ import {
 import {
   BlockStatement,
   ExpressionStatement,
+  IfStatement,
   PrintStatement,
   Statement,
   StatementVisitor,
@@ -36,6 +37,15 @@ class Interpreter
     } catch (error) {
       console.error(error);
     }
+  }
+
+  visitIfStatement(ifStatement: IfStatement): unknown {
+    if (this.isTruthy(ifStatement.condition)) {
+      ifStatement.thenBranch.accept(this);
+    } else if (ifStatement.elseBranch !== undefined) {
+      ifStatement.elseBranch.accept(this);
+    }
+    return null;
   }
 
   visitBlockStatement(blockStatement: BlockStatement): unknown {
