@@ -20,7 +20,7 @@ class Environment {
     }
 
     if (this.enclosing) {
-      this.enclosing.assign(name, value);
+      return this.enclosing.assign(name, value);
     }
 
     throw new Error(`UNdefined variable "${name.lexeme}".`);
