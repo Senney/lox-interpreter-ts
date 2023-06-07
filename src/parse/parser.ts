@@ -17,6 +17,7 @@ import {
   PrintStatement,
   Statement,
   VarStatement,
+  WhileStatement,
 } from '../ast/statement';
 
 class Parser {
@@ -80,6 +81,7 @@ class Parser {
   private statement(): Statement {
     if (this.match(TokenType.IF)) return this.ifStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
+    if (this.match(TokenType.WHILE)) return this.whileStatement();
     if (this.match(TokenType.LEFT_BRACE))
       return new BlockStatement(this.block());
 
@@ -103,6 +105,18 @@ class Parser {
     const value = this.expression();
     this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
     return new PrintStatement(value);
+  }
+
+  private whileStatement(): Statement {
+    this.consume(TokenType.LEFT_PAREN, "Expected '(' after 'while'.");
+    const condition = this.expression();
+    this.consume(
+      TokenType.RIGHT_PAREN,
+      "Expected ')' after 'while' condition."
+    );
+    const body = this.statement();
+
+    return new WhileStatement(condition, body);
   }
 
   private block(): Statement[] {

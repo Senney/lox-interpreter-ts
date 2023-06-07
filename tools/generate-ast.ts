@@ -256,6 +256,7 @@ defineAst(
     'If : Expression condition, Statement thenBranch, Statement elseBranch?',
     'Print : Expression expression',
     'Var : Token name, Expression initializer?',
+    'While : Expression condition, Statement statement',
   ],
   [
     ['Token', 'src/lex/token'],

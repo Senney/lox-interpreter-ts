@@ -6,6 +6,7 @@ export interface StatementVisitor<R> {
   visitIfStatement(ifStatement: IfStatement): R;
   visitPrintStatement(printStatement: PrintStatement): R;
   visitVarStatement(varStatement: VarStatement): R;
+  visitWhileStatement(whileStatement: WhileStatement): R;
 }
 export abstract class Statement {
   abstract accept<R>(visitor: StatementVisitor<R>): R;
@@ -52,5 +53,13 @@ export class VarStatement extends Statement {
   }
   accept<R>(visitor: StatementVisitor<R>): R {
     return visitor.visitVarStatement(this);
+  }
+}
+export class WhileStatement extends Statement {
+  constructor(public condition: Expression, public statement: Statement) {
+    super();
+  }
+  accept<R>(visitor: StatementVisitor<R>): R {
+    return visitor.visitWhileStatement(this);
   }
 }

@@ -17,6 +17,7 @@ import {
   Statement,
   StatementVisitor,
   VarStatement,
+  WhileStatement,
 } from '../ast/statement';
 import { TokenType } from '../lex/token-type';
 import { Environment } from './environment';
@@ -81,6 +82,14 @@ class Interpreter
   visitPrintStatement(printStatement: PrintStatement): unknown {
     const value = this.evaluate(printStatement.expression);
     console.log(this.stringify(value));
+    return null;
+  }
+
+  visitWhileStatement(whileStatement: WhileStatement): unknown {
+    while (this.isTruthy(this.evaluate(whileStatement.condition))) {
+      whileStatement.statement.accept(this);
+    }
+
     return null;
   }
 
