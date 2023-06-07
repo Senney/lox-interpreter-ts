@@ -240,6 +240,7 @@ defineAst(
     'Binary : Expression lhs, Token operator, Expression rhs',
     'Grouping : Expression expr',
     'Literal : unknown value',
+    'Logical : Expression left, Token operator, Expression right',
     'Unary : Expression rhs, Token operator',
     'Variable : Token name',
   ],

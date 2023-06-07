@@ -49,7 +49,10 @@ class Interpreter
   }
 
   visitBlockStatement(blockStatement: BlockStatement): unknown {
-    this.executeBlock(blockStatement.statements, new Environment(this.environment));
+    this.executeBlock(
+      blockStatement.statements,
+      new Environment(this.environment)
+    );
     return null;
   }
 
@@ -137,12 +140,15 @@ class Interpreter
     return this.environment.get(variableExpression.name);
   }
 
-  private executeBlock(statements: Statement[], environment: Environment): void {
+  private executeBlock(
+    statements: Statement[],
+    environment: Environment
+  ): void {
     const previous = this.environment;
 
     try {
       this.environment = environment;
-      statements.forEach(statement => statement.accept(this));
+      statements.forEach((statement) => statement.accept(this));
     } finally {
       this.environment = previous;
     }
