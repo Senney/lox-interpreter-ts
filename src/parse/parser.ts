@@ -10,6 +10,7 @@ import {
 } from '../ast/expression';
 import { TokenType } from '../lex/token-type';
 import {
+  BlockStatement,
   ExpressionStatement,
   PrintStatement,
   Statement,
@@ -76,6 +77,7 @@ class Parser {
 
   private statement(): Statement {
     if (this.match(TokenType.PRINT)) return this.printStatement();
+    if (this.match(TokenType.LEFT_BRACE)) return new BlockStatement(this.block());
 
     return this.expressionStatement();
   }
@@ -84,6 +86,18 @@ class Parser {
     const value = this.expression();
     this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
     return new PrintStatement(value);
+  }
+
+  private block(): Statement[] {
+    const statements = [];
+
+    while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+      statements.push(this.delcaration());
+    }
+
+    this.consume(TokenType.RIGHT_BRACE, "Expected '}' after block.");
+
+    return statements;
   }
 
   private expressionStatement(): Statement {

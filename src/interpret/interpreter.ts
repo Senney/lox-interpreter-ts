@@ -9,6 +9,7 @@ import {
   AssignExpression,
 } from '../ast/expression';
 import {
+  BlockStatement,
   ExpressionStatement,
   PrintStatement,
   Statement,
@@ -35,6 +36,11 @@ class Interpreter
     } catch (error) {
       console.error(error);
     }
+  }
+
+  visitBlockStatement(blockStatement: BlockStatement): unknown {
+    this.executeBlock(blockStatement.statements, new Environment(this.environment));
+    return null;
   }
 
   visitVarStatement(varStatement: VarStatement): unknown {
@@ -119,6 +125,17 @@ class Interpreter
 
   visitVariableExpression(variableExpression: VariableExpression): unknown {
     return this.environment.get(variableExpression.name);
+  }
+
+  private executeBlock(statements: Statement[], environment: Environment): void {
+    const previous = this.environment;
+
+    try {
+      this.environment = environment;
+      statements.forEach(statement => statement.accept(this));
+    } finally {
+      this.environment = previous;
+    }
   }
 
   private evaluate(expr: Expression): unknown {
