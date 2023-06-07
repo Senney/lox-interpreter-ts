@@ -250,6 +250,7 @@ defineAst(
   'src/ast',
   'Statement',
   [
+    'Block : Statement[] statements',
     'Expression : Expression expression',
     'Print : Expression expression',
     'Var : Token name, Expression initializer?',
