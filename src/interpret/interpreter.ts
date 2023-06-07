@@ -42,7 +42,7 @@ class Interpreter
   }
 
   visitIfStatement(ifStatement: IfStatement): unknown {
-    if (this.isTruthy(ifStatement.condition)) {
+    if (this.isTruthy(this.evaluate(ifStatement.condition))) {
       ifStatement.thenBranch.accept(this);
     } else if (ifStatement.elseBranch !== undefined) {
       ifStatement.elseBranch.accept(this);
