@@ -79,6 +79,7 @@ class Parser {
   }
 
   private statement(): Statement {
+    if (this.match(TokenType.FOR)) return this.forStatement();
     if (this.match(TokenType.IF)) return this.ifStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
     if (this.match(TokenType.WHILE)) return this.whileStatement();
@@ -105,6 +106,51 @@ class Parser {
     const value = this.expression();
     this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
     return new PrintStatement(value);
+  }
+
+  private forStatement(): Statement {
+    this.consume(TokenType.LEFT_PAREN, "Expected '(' after 'for'.");
+
+    let initializer: Statement | undefined;
+
+    if (this.match(TokenType.SEMICOLON)) {
+      initializer = undefined;
+    } else if (this.match(TokenType.VAR)) {
+      initializer = this.varDeclaration();
+    } else {
+      initializer = this.expressionStatement();
+    }
+
+    let condition: Expression | undefined;
+    if (!this.check(TokenType.SEMICOLON)) {
+      condition = this.expression();
+    }
+    this.consume(TokenType.SEMICOLON, "Exprected ';' after loop condition.");
+
+    let increment: Expression | undefined;
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      increment = this.expression();
+    }
+
+    this.consume(TokenType.RIGHT_PAREN, "Expected ')' after 'for' condition.");
+
+    let body = this.statement();
+
+    if (increment !== undefined) {
+      body = new BlockStatement([body, new ExpressionStatement(increment)]);
+    }
+
+    if (condition === undefined) {
+      condition = new LiteralExpression(true);
+    }
+
+    body = new WhileStatement(condition, body);
+
+    if (initializer !== undefined) {
+      body = new BlockStatement([initializer, body]);
+    }
+
+    return body;
   }
 
   private whileStatement(): Statement {

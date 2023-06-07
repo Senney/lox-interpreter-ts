@@ -6,4 +6,10 @@ while (x < 20) {
   print x;
 }
 
+print "for loop:";
+
+for (var i = 0; i < 30; i = i + 1) {
+  print i;
+}
+
 print "Done!";
