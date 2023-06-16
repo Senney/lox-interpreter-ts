@@ -8,6 +8,7 @@ import {
   VariableExpression,
   AssignExpression,
   LogicalExpression,
+  CallExpression,
 } from '../ast/expression';
 import {
   BlockStatement,
@@ -20,15 +21,18 @@ import {
   WhileStatement,
 } from '../ast/statement';
 import { TokenType } from '../lex/token-type';
+import { isCallable } from './callable';
 import { Environment } from './environment';
+import { ClockCallable } from './native-fns';
 
 class Interpreter
   implements ExpressionVisitor<unknown>, StatementVisitor<unknown>
 {
-  private environment: Environment;
+  private static globals: Environment = new Environment();
+  private environment: Environment = Interpreter.globals;
 
-  constructor(environment?: Environment) {
-    this.environment = environment ?? new Environment();
+  constructor() {
+    Interpreter.globals.define('clock', new ClockCallable());
   }
 
   interpret(statements: Statement[]): void {
@@ -123,6 +127,27 @@ class Interpreter
       case TokenType.EQUAL_EQUAL:
         return this.isEqual(left, right);
     }
+  }
+
+  visitCallExpression(callExpression: CallExpression): unknown {
+    const callee = this.evaluate(callExpression.callee);
+    const args: unknown[] = [];
+
+    for (const arg of callExpression.args) {
+      args.push(this.evaluate(arg));
+    }
+
+    if (!isCallable(callee)) {
+      throw new Error('Can only call functions and classes.');
+    }
+
+    if (args.length !== callee.arity()) {
+      throw new Error(
+        `Expected ${callee.arity()} arguments but got ${args.length}.`
+      );
+    }
+
+    return callee.call(this, args);
   }
 
   visitGroupingExpression(groupingExpression: GroupingExpression): unknown {

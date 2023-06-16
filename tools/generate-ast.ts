@@ -238,6 +238,7 @@ defineAst(
   [
     'Assign : Token name, Expression value',
     'Binary : Expression lhs, Token operator, Expression rhs',
+    'Call : Expression callee, Token paren, Expression[] args',
     'Grouping : Expression expr',
     'Literal : unknown value',
     'Logical : Expression left, Token operator, Expression right',

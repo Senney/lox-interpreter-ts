@@ -8,6 +8,7 @@ import {
   VariableExpression,
   AssignExpression,
   LogicalExpression,
+  CallExpression,
 } from '../ast/expression';
 import { TokenType } from '../lex/token-type';
 import {
@@ -269,7 +270,42 @@ class Parser {
       return new UnaryExpression(right, operator);
     }
 
-    return this.primary();
+    return this.call();
+  }
+
+  private call(): Expression {
+    let expr = this.primary();
+
+    while (true) {
+      if (this.match(TokenType.LEFT_PAREN)) {
+        expr = this.finishCall(expr);
+      } else {
+        break;
+      }
+    }
+
+    return expr;
+  }
+
+  private finishCall(callee: Expression): Expression {
+    const args: Expression[] = [];
+
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (args.length > 255) {
+          throw new Error('Cannot have more than 255 arguments.');
+        }
+
+        args.push(this.expression());
+      } while (this.match(TokenType.COMMA));
+    }
+
+    const paren = this.consume(
+      TokenType.RIGHT_PAREN,
+      'Expected ")" after arguments.'
+    );
+
+    return new CallExpression(callee, paren, args);
   }
 
   private primary(): Expression {
