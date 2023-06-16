@@ -13,6 +13,7 @@ import {
 import {
   BlockStatement,
   ExpressionStatement,
+  FunctionStatement,
   IfStatement,
   PrintStatement,
   Statement,
@@ -21,14 +22,14 @@ import {
   WhileStatement,
 } from '../ast/statement';
 import { TokenType } from '../lex/token-type';
-import { isCallable } from './callable';
+import { LoxFunction, isCallable } from './callable';
 import { Environment } from './environment';
 import { ClockCallable } from './native-fns';
 
 class Interpreter
   implements ExpressionVisitor<unknown>, StatementVisitor<unknown>
 {
-  private static globals: Environment = new Environment();
+  public static readonly globals: Environment = new Environment();
   private environment: Environment = Interpreter.globals;
 
   constructor() {
@@ -43,6 +44,15 @@ class Interpreter
     } catch (error) {
       console.error(error);
     }
+  }
+
+  visitFunctionStatement(functionStatement: FunctionStatement): unknown {
+    this.environment.define(
+      functionStatement.name.lexeme,
+      new LoxFunction(functionStatement)
+    );
+
+    return null;
   }
 
   visitIfStatement(ifStatement: IfStatement): unknown {
@@ -187,10 +197,7 @@ class Interpreter
     return this.environment.get(variableExpression.name);
   }
 
-  private executeBlock(
-    statements: Statement[],
-    environment: Environment
-  ): void {
+  public executeBlock(statements: Statement[], environment: Environment): void {
     const previous = this.environment;
 
     try {

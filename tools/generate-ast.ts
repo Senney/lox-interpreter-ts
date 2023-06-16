@@ -254,6 +254,7 @@ defineAst(
   [
     'Block : Statement[] statements',
     'Expression : Expression expression',
+    'Function : Token name, Token[] params, Statement[] body',
     'If : Expression condition, Statement thenBranch, Statement elseBranch?',
     'Print : Expression expression',
     'Var : Token name, Expression initializer?',

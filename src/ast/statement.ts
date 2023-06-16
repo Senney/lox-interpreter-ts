@@ -3,6 +3,7 @@ import { Expression } from './expression';
 export interface StatementVisitor<R> {
     visitBlockStatement(blockStatement: BlockStatement): R;
     visitExpressionStatement(expressionStatement: ExpressionStatement): R;
+    visitFunctionStatement(functionStatement: FunctionStatement): R;
     visitIfStatement(ifStatement: IfStatement): R;
     visitPrintStatement(printStatement: PrintStatement): R;
     visitVarStatement(varStatement: VarStatement): R;
@@ -18,6 +19,10 @@ export class BlockStatement extends Statement {
 export class ExpressionStatement extends Statement {
     constructor(public expression: Expression) { super(); }
     accept<R>(visitor: StatementVisitor<R>): R { return visitor.visitExpressionStatement(this); }
+}
+export class FunctionStatement extends Statement {
+    constructor(public name: Token, public params: Token[], public body: Statement[]) { super(); }
+    accept<R>(visitor: StatementVisitor<R>): R { return visitor.visitFunctionStatement(this); }
 }
 export class IfStatement extends Statement {
     constructor(public condition: Expression, public thenBranch: Statement, public elseBranch?: Statement) { super(); }

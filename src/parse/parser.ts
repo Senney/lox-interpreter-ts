@@ -14,6 +14,7 @@ import { TokenType } from '../lex/token-type';
 import {
   BlockStatement,
   ExpressionStatement,
+  FunctionStatement,
   IfStatement,
   PrintStatement,
   Statement,
@@ -58,11 +59,40 @@ class Parser {
   }
 
   private delcaration(): Statement {
+    if (this.match(TokenType.FUN)) {
+      return this.functionDeclaration('function');
+    }
+
     if (this.match(TokenType.VAR)) {
       return this.varDeclaration();
     }
 
     return this.statement();
+  }
+
+  private functionDeclaration(kind: 'function' | 'method'): FunctionStatement {
+    const name = this.consume(TokenType.IDENTIFIER, `Expected ${kind} name.`);
+    this.consume(TokenType.LEFT_PAREN, `Expected "(" after ${kind} name.`);
+    const parameters: Token[] = [];
+
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (parameters.length > 255) {
+          throw new Error('Cannot have more than 255 parameters.');
+        }
+
+        parameters.push(
+          this.consume(TokenType.IDENTIFIER, 'Expected parameter name.')
+        );
+      } while (this.match(TokenType.COMMA));
+    }
+
+    this.consume(TokenType.RIGHT_PAREN, 'Expected ")" after parameters.');
+    this.consume(TokenType.LEFT_BRACE, `Expected "{" before ${kind} body.`);
+
+    const body = this.block();
+
+    return new FunctionStatement(name, parameters, body);
   }
 
   private varDeclaration(): Statement {
