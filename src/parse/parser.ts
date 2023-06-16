@@ -17,6 +17,7 @@ import {
   FunctionStatement,
   IfStatement,
   PrintStatement,
+  ReturnStatement,
   Statement,
   VarStatement,
   WhileStatement,
@@ -113,6 +114,7 @@ class Parser {
     if (this.match(TokenType.FOR)) return this.forStatement();
     if (this.match(TokenType.IF)) return this.ifStatement();
     if (this.match(TokenType.PRINT)) return this.printStatement();
+    if (this.match(TokenType.RETURN)) return this.returnStatement();
     if (this.match(TokenType.WHILE)) return this.whileStatement();
     if (this.match(TokenType.LEFT_BRACE))
       return new BlockStatement(this.block());
@@ -137,6 +139,17 @@ class Parser {
     const value = this.expression();
     this.consume(TokenType.SEMICOLON, "Expected ';' after value.");
     return new PrintStatement(value);
+  }
+
+  private returnStatement(): Statement {
+    const keyword = this.previous();
+    const value = !this.check(TokenType.SEMICOLON)
+      ? this.expression()
+      : undefined;
+
+    this.consume(TokenType.SEMICOLON, 'Expected ";" after return value.');
+
+    return new ReturnStatement(keyword, value);
   }
 
   private forStatement(): Statement {

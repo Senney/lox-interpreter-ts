@@ -1,6 +1,7 @@
 import { FunctionStatement } from '../ast/statement';
 import { Environment } from './environment';
 import { Interpreter } from './interpreter';
+import { isReturnError } from './return';
 
 const CallableSymbol = Symbol('callable');
 
@@ -38,7 +39,15 @@ export class LoxFunction implements Callable {
       environment.define(param.lexeme, args[i]);
     }
 
-    interpreter.executeBlock(this.declaration.body, environment);
+    try {
+      interpreter.executeBlock(this.declaration.body, environment);
+    } catch (error) {
+      if (isReturnError(error)) {
+        return error.value;
+      }
+
+      throw error;
+    }
 
     return null;
   }

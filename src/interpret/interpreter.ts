@@ -16,6 +16,7 @@ import {
   FunctionStatement,
   IfStatement,
   PrintStatement,
+  ReturnStatement,
   Statement,
   StatementVisitor,
   VarStatement,
@@ -25,6 +26,7 @@ import { TokenType } from '../lex/token-type';
 import { LoxFunction, isCallable } from './callable';
 import { Environment } from './environment';
 import { ClockCallable } from './native-fns';
+import { Return } from './return';
 
 class Interpreter
   implements ExpressionVisitor<unknown>, StatementVisitor<unknown>
@@ -97,6 +99,14 @@ class Interpreter
     const value = this.evaluate(printStatement.expression);
     console.log(this.stringify(value));
     return null;
+  }
+
+  visitReturnStatement(returnStatement: ReturnStatement): unknown {
+    const value = returnStatement.value
+      ? this.evaluate(returnStatement.value)
+      : undefined;
+
+    throw new Return(value);
   }
 
   visitWhileStatement(whileStatement: WhileStatement): unknown {
