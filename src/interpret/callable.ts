@@ -29,10 +29,13 @@ export const isCallable = (candidate: unknown): candidate is Callable => {
 export class LoxFunction implements Callable {
   public [CallableSymbol] = true;
 
-  constructor(private declaration: FunctionStatement) {}
+  constructor(
+    private declaration: FunctionStatement,
+    private closure: Environment
+  ) {}
 
   call(interpreter: Interpreter, args: unknown[]): unknown {
-    const environment = new Environment(Interpreter.globals);
+    const environment = new Environment(this.closure);
 
     for (let i = 0; i < this.declaration.params.length; i++) {
       const param = this.declaration.params[i];

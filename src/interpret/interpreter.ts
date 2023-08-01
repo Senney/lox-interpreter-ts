@@ -51,7 +51,7 @@ class Interpreter
   visitFunctionStatement(functionStatement: FunctionStatement): unknown {
     this.environment.define(
       functionStatement.name.lexeme,
-      new LoxFunction(functionStatement)
+      new LoxFunction(functionStatement, this.environment)
     );
 
     return null;
