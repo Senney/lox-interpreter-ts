@@ -23,7 +23,11 @@ class Environment {
       return this.enclosing.assign(name, value);
     }
 
-    throw new Error(`UNdefined variable "${name.lexeme}".`);
+    throw new Error(`Undefined variable "${name.lexeme}".`);
+  }
+
+  public assignAt(distance: number, name: Token, value: unknown): void {
+    this.ancestor(distance).values.set(name.lexeme, value);
   }
 
   public get(name: Token): unknown {
@@ -36,6 +40,23 @@ class Environment {
     }
 
     throw new Error(`Undefined variable "${name.lexeme}.`);
+  }
+
+  public getAt(distance: number, name: string): unknown {
+    return this.ancestor(distance).values.get(name);
+  }
+
+  private ancestor(distance: number): Environment {
+    let env: Environment | undefined = this;
+    for (let i = 0; i < distance; i++) {
+      env = env?.enclosing;
+    }
+
+    if (!env) {
+      throw new Error('Unable to resolve ancestor environment');
+    }
+
+    return env;
   }
 }
 

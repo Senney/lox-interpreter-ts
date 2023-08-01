@@ -22,6 +22,7 @@ import {
   VarStatement,
   WhileStatement,
 } from '../ast/statement';
+import { Token } from '../lex/token';
 import { TokenType } from '../lex/token-type';
 import { LoxFunction, isCallable } from './callable';
 import { Environment } from './environment';
@@ -33,9 +34,12 @@ class Interpreter
 {
   public static readonly globals: Environment = new Environment();
   private environment: Environment = Interpreter.globals;
+  private locals: Map<Expression, number>;
 
   constructor() {
     Interpreter.globals.define('clock', new ClockCallable());
+
+    this.locals = new Map();
   }
 
   interpret(statements: Statement[]): void {
@@ -46,6 +50,10 @@ class Interpreter
     } catch (error) {
       console.error(error);
     }
+  }
+
+  public resolve(expression: Expression, depth: number): void {
+    this.locals.set(expression, depth);
   }
 
   visitFunctionStatement(functionStatement: FunctionStatement): unknown {
@@ -86,7 +94,15 @@ class Interpreter
 
   visitAssignExpression(assignExpression: AssignExpression): unknown {
     const value = this.evaluate(assignExpression.value);
-    this.environment.assign(assignExpression.name, value);
+
+    const distance = this.locals.get(assignExpression);
+
+    if (distance !== undefined) {
+      this.environment.assignAt(distance, assignExpression.name, value);
+    } else {
+      Interpreter.globals.assign(assignExpression.name, value);
+    }
+
     return value;
   }
 
@@ -204,7 +220,7 @@ class Interpreter
   }
 
   visitVariableExpression(variableExpression: VariableExpression): unknown {
-    return this.environment.get(variableExpression.name);
+    return this.lookUpVariable(variableExpression.name, variableExpression);
   }
 
   public executeBlock(statements: Statement[], environment: Environment): void {
@@ -245,6 +261,16 @@ class Interpreter
   private stringify(value: unknown): string {
     if (value === null) return 'nil';
     return `${value}`;
+  }
+
+  private lookUpVariable(name: Token, expression: Expression): unknown {
+    const distance = this.locals.get(expression);
+
+    if (distance !== undefined) {
+      return this.environment.getAt(distance, name.lexeme);
+    } else {
+      return Interpreter.globals.get(name);
+    }
   }
 }
 

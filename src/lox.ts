@@ -4,6 +4,7 @@ import { LoxRepl } from './repl/lox-repl';
 import { Scanner } from './lex/scanner';
 import { Parser } from './parse/parser';
 import { Interpreter } from './interpret/interpreter';
+import { Resolver } from './interpret/resolver';
 
 let hadError = false;
 
@@ -42,7 +43,11 @@ class LoxCompiler {
     const parser = new Parser(tokens);
     const statements = parser.parse();
 
-    new Interpreter().interpret(statements);
+    const interpreter = new Interpreter();
+    const resolver = new Resolver(interpreter);
+    resolver.resolveStatements(statements);
+
+    interpreter.interpret(statements);
   }
 
   public static error(line: number, err: string): void {
